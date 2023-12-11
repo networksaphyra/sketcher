@@ -81,7 +81,7 @@ function changeCellColor(cell) {
   } else if (currentMode === "paint") {
     paintAllCells();
   } else {
-    const dimAmount = 30;
+    const dimAmount = 10;
     let [r, g, b] = cell.style.backgroundColor.match(/\d+/g);
 
     r = Math.max(0, parseInt(r, 10) - dimAmount);
@@ -121,6 +121,14 @@ function reloadGrid() {
   setupGrid();
 }
 
+function setupDefaults() {
+  setGridSize();
+  setupGrid();
+  currentColor = "#ffffff";
+  paintAllCells();
+  currentColor = DEFAULT_COLOR;
+}
+
 let mouseDown = false;
 document.body.onmousedown = () => mouseDown = true;
 document.body.onmouseup = () => mouseDown = false;
@@ -146,6 +154,4 @@ toggleEraser.onclick = () => setCurrentMode("eraser");
 clearButton.onclick = () => reloadGrid();
 toggleGridlines.onclick = () => toggleGridline();
 
-setGridSize();
-setupGrid();
-
+setupDefaults();
