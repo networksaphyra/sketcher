@@ -1,63 +1,125 @@
-let container = document.getElementById("container");
-let gridCount = 30;
-let currentBackgroundColor = "#fff";
-let currentGridColor = "#000";
-const gridSize = 600;
+const DEFAULT_COLOR = "#000000";
+const DEFAULT_MODE = "color";
+const DEFAULT_SIZE = 16;
+const PIXEL_GRID_SIZE = 700;
 
-function setContainerSize() {
-  container.style.height = `${gridSize}px`;
-  container.style.width = `${gridSize}px`;
+let currentColor = DEFAULT_COLOR;
+let currentMode = DEFAULT_MODE;
+let currentSize = DEFAULT_SIZE;
+
+function setGridSize() {
+  grid.style.height = `${PIXEL_GRID_SIZE}px`;
+  grid.style.width = `${PIXEL_GRID_SIZE}px`;
 }
 
-
-function setStyleColors() {
-  let gridElements = document.getElementsByClassName("grid-elemnt");
-  gridElements.forEach(element => {
-    element.style.backgroundColor = currentBackgroundColor;
-    if (element.style.borderColor != currentGridColor) {
-      element.style.borderColor = currentGridColor;
-    }
-  });
+function setCurrentColor(newColor) {
+  currentColor = newColor;
 }
 
-function colorGridElement(gridElement, color) {
-  gridElement.style.backgroundColor = color;
+function setCurrentMode(newMode) {
+  currentMode = newMode;
 }
 
+function setCurrentSize(newSize) {
+  currentSize = newSize;
+  reloadGrid();
+}
 
-function generateGrid() {
-  let width = gridSize / gridCount; 
-  let height = gridSize / gridCount;
+function getCellSize() {
+  return PIXEL_GRID_SIZE / currentSize;
+}
 
-  for (let i=0; i<gridCount; ++i) {
-    let currentDivs = [];
-    for (let j=0; j<gridCount; ++j) {
-      div = document.createElement("div");
-      div.classList.add("grid-element");
-      div.style.width = `${width}px`;
-      div.style.height = `${height}px`;
-      div.addEventListener("click", colorGridElement(div, currentBackgroundColor));
-      currentDivs.push(div);
-    }
-    let divContainer = document.createElement("div");
-    currentDivs.forEach(div => {
-      divContainer.appendChild(div);
-    });
-    divContainer.style.display = "flex";
-    divContainer.style.flexDirection = "row";
-    container.appendChild(divContainer);
+function createCell(CELL_SIZE) {
+  let div = document.createElement("div");
+
+  div.classList.add("grid-cell");
+  div.style.width = `${CELL_SIZE}px`;
+  div.style.height = `${CELL_SIZE}px`;
+
+  div.addEventListener("mouseover", () => changeCellColor(div));
+  
+  return div;
+}
+
+function createCellRow(cells) {
+  let cellRow = document.createElement("div");
+  cells.forEach(element => cellRow.appendChild(element));
+  
+  cellRow.style.display = "flex";
+  cellRow.style.flexDirection = "row";
+
+  return cellRow 
+}
+
+function changeCellColor(cell) {
+  if (!mouseDown) return;
+  if (currentMode === "rainbow") {
+    const randomR = Math.floor(Math.random() * 256);
+    const randomG = Math.floor(Math.random() * 256);
+    const randomB = Math.floor(Math.random() * 256);
+
+    cell.style.backgroundColor = `rgb(${randomR}, ${randomG}, ${randomB})`;
+  } else if (currentMode === "color") {
+    cell.style.backgroundColor = currentColor;
+  } else if (currentMode === "eraser"){
+    cell.style.backgroundColor = "#fefefe";
+  } else {
+    const dimAmount = 30;
+    let [r, g, b] = cell.style.backgroundColor.match(/\d+/g);
+
+    r = Math.max(0, parseInt(r, 10) - dimAmount);
+    g = Math.max(0, parseInt(g, 10) - dimAmount);
+    b = Math.max(0, parseInt(b, 10) - dimAmount);
+
+    cell.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
   }
-  container.style.height = gridSize;
-  container.style.width = gridSize;
 }
 
-function hideGridlines() {
-  let gridElements = document.getElementsByClassName("grid-element");
-  gridElements.forEach(element => {
-    element.style.border = "none";
-    });
+
+function setupGrid() {
+  const CELL_SIZE = getCellSize();
+
+  for (let i=0; i<currentSize; ++i) {
+    let cells = [];
+
+    for (let j=0; j<currentSize; ++j) {
+      cells.push(createCell(CELL_SIZE));
+    }
+
+    grid.appendChild(createCellRow(cells));
+  }
 }
 
-setContainerSize();
-generateGrid();
+function clearGrid() {
+  grid.innerHTML = "";
+}
+
+function reloadGrid() {
+  clearGrid();
+  setupGrid();
+}
+
+let mouseDown = false;
+document.body.onmousedown = () => mouseDown = true;
+document.body.onmouseup = () => mouseDown = false;
+
+const colorPicker = document.getElementById('colorPicker');
+const sizeSlider = document.getElementById('sizeSlider');
+const toggleRainbow = document.getElementById("toggleRainbow");
+const toggleColor = document.getElementById("toggleColor");
+const toggleShader = document.getElementById("toggleShader");
+const toggleEraser = document.getElementById("toggleEraser");
+const clearButton = document.getElementById("clearButton");
+const grid = document.getElementById("grid");
+
+colorPicker.oninput = () => setCurrentColor(colorPicker.value);
+sizeSlider.oninput = () => setCurrentSize(sizeSlider.value);
+toggleRainbow.onclick = () => setCurrentMode("rainbow");
+toggleColor.onclick = () => setCurrentMode("color");
+toggleShader.onclick = () => setCurrentMode("shader");
+toggleEraser.onclick = () => setCurrentMode("eraser");
+clearButton.onclick = () => reloadGrid();
+
+setGridSize();
+setupGrid();
 
