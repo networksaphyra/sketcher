@@ -1,0 +1,17 @@
+body {
+  background-color: #6B5B95;
+  margin: 0;
+  padding: 0;
+}
+
+#container {
+  display: flex;
+  flex-direction: column;
+  border: 10px solid black;
+}
+
+.grid-element {
+  box-sizing: border-box;
+  background-color: #88B04B;
+  border: 1px solid #34568B;
+}
